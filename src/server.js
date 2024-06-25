@@ -1,71 +1,69 @@
-import express from "express";
-import cors from "cors";
-import pino from "pino-http";
+import express from 'express';
+import pino from 'pino-http';
+import cors from 'cors';
+import { env } from './utils/env.js';
+import { DATABASE_PARAMS, ENV_VARS } from './constants/index.js';
+import { notFoundMiddleware } from './middlewares/notFoundMiddleware.js';
+import { errorHandlerMiddleware } from './middlewares/errorHandlerMiddleware.js';
+import { getAllContacts, getContactById } from './services/contacts.js';
 
-import env from "./utils/env.js";
+export const setupServer = () => {
+  const app = express();
 
-import { getMovies, getMovieById } from "./services/movie-services.js";
+  app.use(
+    pino({
+      transport: {
+        target: 'pino-pretty',
+      },
+    }),
+  );
 
-const port = env("PORT", "3000");
+  app.use(cors());
 
-const startServer = () => {
-    const app = express();
-
-    const logger = pino({
-        transport: {
-            target: "pino-pretty"
-        }
+  app.get('/contacts', async (req, res) => {
+    const contacts = await getAllContacts();
+    res.json({
+      status: 200,
+      message: 'Successfully found contacts!',
+      data: contacts,
     });
+    console.log(req.method);
+  });
 
-    app.use(logger);
-    app.use(cors());
+  app.get('/contacts/:contactId', async (req, res) => {
+    const { contactId } = req.params;
 
-    app.get("/api/movies", async (req, res) => {
-        const data = await getMovies();
+    const id = contactId.split('');
+    if (id.length !== DATABASE_PARAMS.ID_LENGTH) {
+      return res.status(400).json({
+        status: 400,
+        message: `id ${contactId} is not correct!`,
+      });
+    }
 
-        res.json({
-            status: 200,
-            data,
-            message: "Success found movies"
-        });
-    })
+    const contact = await getContactById(contactId);
 
-    app.get("/api/movies/:id", async (req, res) => {
-        try {
-            const { id } = req.params;
+    if (!contact) {
+      return res.status(404).json({
+        status: 404,
+        message: `Contact with id ${contactId} is not found!`,
+      });
+    }
 
-            const data = await getMovieById(id);
+    res.json({
+      status: 200,
+      message: `Successfully found contact with id ${contactId}!`,
+      data: contact,
+    });
+  });
 
-            if (!data) {
-                return res.status(404).json({
-                    message: `Movie with id=${id} not found`
-                })
-            }
+  app.use('*', notFoundMiddleware);
 
-            res.json({
-                status: 200,
-                data,
-                message: `Contact with id=${id} find success`
-            })
-        }
-        catch (error) {
-            if (error.message.includes("Cast to ObjectId failed")) {
-                error.status = 404;
-            }
-            const { status = 500 } = error;
-            res.status(status).json({
-                message: error.message
-            })
-        }
-    })
+  app.use(errorHandlerMiddleware);
 
-    app.use((req, res) => {
-        res.status(404).json({
-            message: "Not Found"
-        })
-    })
+  const PORT = Number(env(ENV_VARS.PORT, '3000'));
 
-    app.listen(port, () => console.log(`Server running on ${port} PORT`))
-}
-
-export default startServer;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+};
