@@ -17,5 +17,3 @@ export const initMongoConnection = async () => {
     throw err;
   }
 };
-
-// const mongoUri = `mongodb+srv://${dbUser}:${dbPassword}@${dbUrl}/${dbName}?retryWrites=true&w=majority&appName=Cluster0`;
