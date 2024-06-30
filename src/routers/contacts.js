@@ -1,13 +1,15 @@
 import express from 'express';
-import * as contactsController from '../controllers/contacts.js';
 import { ctrlWrapper } from '../middlewares/ctrlWrapper.js';
+import * as ctrl from '../controllers/contacts.js';
+import { validateBody } from '../validation/validateBody.js';
+import { createContactSchema, updateContactSchema } from '../validation/contactValidation.js';
 
 const router = express.Router();
 
-router.get('/', ctrlWrapper(contactsController.getAllContacts));
-router.get('/:contactId', ctrlWrapper(contactsController.getContactById));
-router.post('/', ctrlWrapper(contactsController.createContact));
-router.patch('/:contactId', ctrlWrapper(contactsController.updateContact));
-router.delete('/:contactId', ctrlWrapper(contactsController.deleteContact));
+router.get('/', ctrlWrapper(ctrl.getAllContacts));
+router.get('/:contactId', ctrlWrapper(ctrl.getContactById));
+router.post('/', validateBody(createContactSchema), ctrlWrapper(ctrl.createContact));
+router.patch('/:contactId', validateBody(updateContactSchema), ctrlWrapper(ctrl.updateContact));
+router.delete('/:contactId', ctrlWrapper(ctrl.deleteContact));
 
 export default router;
