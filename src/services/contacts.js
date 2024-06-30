@@ -1,4 +1,3 @@
-// src/services/contacts.js
 import { Contact } from '../db/models/contact.js';
 
 export const getAllContacts = async () => {
