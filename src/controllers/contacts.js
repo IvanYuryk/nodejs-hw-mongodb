@@ -3,37 +3,39 @@ import createError from 'http-errors';
 import * as contactService from '../services/contacts.js';
 import { Contact } from '../db/models/contact.js';
 
+import parsePaginationParams from '../utils/parsePaginationParams.js';
+import parseFilterParams from '../utils/parseFilterParams.js';
+import parseSortParams from '../utils/parseSortParams.js';
+import { calculatePaginationData } from '../utils/calculatePaginationData.js';
+
 export const getAllContacts = async (req, res, next) => {
-  const { page = 1, perPage = 10, sortBy = 'name', sortOrder = 'asc', type, isFavourite } = req.query;
+  const paginationParams = parsePaginationParams(req.query);
+  const filterParams = parseFilterParams(req.query);
+  const sortParams = parseSortParams(req.query, ['name', 'phoneNumber', 'email', 'contactType']);
 
   const filter = {};
-  if (type) filter.contactType = type;
-  if (isFavourite !== undefined) filter.isFavourite = isFavourite === 'true';
+  if (filterParams.type) filter.contactType = filterParams.type;
+  if (filterParams.isFavourite !== undefined) filter.isFavourite = filterParams.isFavourite;
 
   try {
-    const totalItems = await Contact.countDocuments(filter);
-    const totalPages = Math.ceil(totalItems / perPage);
+      const totalItems = await Contact.countDocuments(filter);
+      const paginationData = calculatePaginationData(totalItems, paginationParams.perPage, paginationParams.page);
 
-    const contacts = await Contact.find(filter)
-      .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
-      .skip((page - 1) * perPage)
-      .limit(parseInt(perPage, 10));
+      const contacts = await Contact.find(filter)
+          .sort({ [sortParams.sortBy]: sortParams.sortOrder === 'asc' ? 1 : -1 })
+          .skip((paginationParams.page - 1) * paginationParams.perPage)
+          .limit(paginationParams.perPage);
 
-    res.json({
-      status: 200,
-      message: 'Successfully found contacts!',
-      data: {
-        data: contacts,
-        page: parseInt(page, 10),
-        perPage: parseInt(perPage, 10),
-        totalItems,
-        totalPages,
-        hasPreviousPage: page > 1,
-        hasNextPage: page < totalPages,
-      },
-    });
+      res.json({
+          status: 200,
+          message: 'Successfully found contacts!',
+          data: {
+              data: contacts,
+              ...paginationData
+          },
+      });
   } catch (error) {
-    next(error);
+      next(error);
   }
 };
 

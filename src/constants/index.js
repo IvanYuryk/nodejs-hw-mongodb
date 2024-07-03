@@ -6,3 +6,5 @@
     MONGODB_DB: 'MONGODB_DB',
   };
   
+  export const typeList = ['work', 'home', 'personal'];
+  export const sortList = ['asc', 'desc'];
