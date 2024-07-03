@@ -1,6 +1,7 @@
-import { Contact } from '../db/models/contact.js';
 import createError from 'http-errors';
-const { NotFound} = createError;
+
+import * as contactService from '../services/contacts.js';
+import { Contact } from '../db/models/contact.js';
 
 export const getAllContacts = async (req, res, next) => {
   const { page = 1, perPage = 10, sortBy = 'name', sortOrder = 'asc', type, isFavourite } = req.query;
@@ -12,6 +13,7 @@ export const getAllContacts = async (req, res, next) => {
   try {
     const totalItems = await Contact.countDocuments(filter);
     const totalPages = Math.ceil(totalItems / perPage);
+
     const contacts = await Contact.find(filter)
       .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
       .skip((page - 1) * perPage)
@@ -36,18 +38,13 @@ export const getAllContacts = async (req, res, next) => {
 };
 
 export const getContactById = async (req, res, next) => {
-  const { contactId } = req.params;
-
   try {
-    const contact = await Contact.findById(contactId);
+    const { contactId } = req.params;
+    const contact = await contactService.getContactById(contactId);
     if (!contact) {
-      throw new NotFound('Contact not found');
+      throw createError(404, 'Contact not found');
     }
-    res.json({
-      status: 200,
-      message: 'Successfully found the contact!',
-      data: contact,
-    });
+    res.status(200).json({ status: 'success', data: contact });
   } catch (error) {
     next(error);
   }
@@ -55,27 +52,26 @@ export const getContactById = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const newContact = await Contact.create(req.body);
+    const newContact = await contactService.createContact(req.body);
     res.status(201).json({
-      status: 201,
-      message: 'Successfully created a contact!',
-      data: newContact,
-    });
+    status: 'success',
+    message: 'Successfully created a contact!',
+    data: newContact,
+  });
   } catch (error) {
     next(error);
   }
 };
 
 export const updateContact = async (req, res, next) => {
-  const { contactId } = req.params;
-
   try {
-    const updatedContact = await Contact.findByIdAndUpdate(contactId, req.body, { new: true });
+    const { contactId } = req.params;
+    const updatedContact = await contactService.updateContact(contactId, req.body);
     if (!updatedContact) {
-      throw new NotFound('Contact not found');
+      throw createError(404, 'Contact not found');
     }
-    res.json({
-      status: 200,
+    res.status(200).json({
+      status: 'success',
       message: 'Successfully patched a contact!',
       data: updatedContact,
     });
@@ -85,14 +81,17 @@ export const updateContact = async (req, res, next) => {
 };
 
 export const deleteContact = async (req, res, next) => {
-  const { contactId } = req.params;
-
   try {
-    const deletedContact = await Contact.findByIdAndDelete(contactId);
+    const { contactId } = req.params;
+    const deletedContact = await contactService.deleteContact(contactId);
     if (!deletedContact) {
-      throw new NotFound('Contact not found');
+      throw createError(404, 'Contact not found');
     }
-    res.status(204).send();
+    res.status(200).json({
+      status: 'success',
+      message: 'Contact successfully deleted',
+      data: deletedContact,
+    });
   } catch (error) {
     next(error);
   }
