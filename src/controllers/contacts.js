@@ -7,11 +7,12 @@ import parsePaginationParams from '../utils/parsePaginationParams.js';
 import parseFilterParams from '../utils/parseFilterParams.js';
 import parseSortParams from '../utils/parseSortParams.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
+import { fieldList } from '../constants/index.js';
 
 export const getAllContacts = async (req, res, next) => {
   const paginationParams = parsePaginationParams(req.query);
   const filterParams = parseFilterParams(req.query);
-  const sortParams = parseSortParams(req.query, ['name', 'phoneNumber', 'email', 'contactType']);
+  const sortParams = parseSortParams(req.query, fieldList);
 
   const filter = {};
   if (filterParams.type) filter.contactType = filterParams.type;

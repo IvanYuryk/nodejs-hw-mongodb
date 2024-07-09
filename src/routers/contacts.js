@@ -1,11 +1,13 @@
 import express from 'express';
-import { ctrlWrapper } from '../middlewares/ctrlWrapper.js';
 import * as ctrl from '../controllers/contacts.js';
 import { isValidId } from '../validation/isValidId.js';
+import { ctrlWrapper } from '../middlewares/ctrlWrapper.js';
 import { validateBody } from '../validation/validateBody.js';
 import { createContactSchema, updateContactSchema } from '../validation/contactValidation.js';
+import { authenticate } from '../middlewares/authenticate.js';
 
 const router = express.Router();
+router.use(authenticate);
 
 router.get('/', ctrlWrapper(ctrl.getAllContacts));
 router.get('/:contactId', isValidId, ctrlWrapper(ctrl.getContactById));

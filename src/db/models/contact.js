@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { typeList } from '../constants/index.js';
+import { typeList } from "../../constants/index.js";
 
 const contactSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -10,7 +10,12 @@ const contactSchema = new mongoose.Schema({
     type: String,
     enum: typeList,
     required: true,
-    default: 'personal',
+    default: "personal",
+  },
+  userId: { 
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
+    required: true,
   },
 }, { timestamps: true,
      versionKey: false

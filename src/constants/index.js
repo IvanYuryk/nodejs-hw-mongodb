@@ -8,3 +8,10 @@
   
   export const typeList = ['work', 'home', 'personal'];
   export const sortList = ['asc', 'desc'];
+  export const fieldList = ['name', 'phoneNumber', 'email', 'contactType'];
+
+  export const emailRegexp = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+
+
+  export const ACCESS_LIFETIME = 15 * 60 * 1000;
+  export const REFRESH_LIFETIME = 30 * 24 * 3600 * 1000;

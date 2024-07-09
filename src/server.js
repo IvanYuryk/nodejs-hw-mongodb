@@ -4,11 +4,14 @@ import contactsRouter from './routers/contacts.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 
+import router from './routers/auth.js';
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+app.use('/auth', router);
 app.use('/contacts', contactsRouter);
 
 app.use(notFoundHandler);
