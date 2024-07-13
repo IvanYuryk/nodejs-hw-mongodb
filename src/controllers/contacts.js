@@ -43,7 +43,10 @@ export const getContactById = async (req, res) => {
   if (!contact) {
     throw createError(404, 'Contact not found');
   }
-  res.status(200).json({ status: 'success', data: contact });
+  res.status(200).json({
+    status: 200,
+    message: `Contact with id=${contactId} found success`,
+    data: contact });
 };
 
 export const createContact = async (req, res) => {
