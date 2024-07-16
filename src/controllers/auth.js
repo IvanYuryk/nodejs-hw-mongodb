@@ -1,5 +1,5 @@
 import createError from "http-errors";
-import { signup, findUser } from "../services/auth.js";
+import { signup, findUser, requestResetToken } from "../services/auth.js";
 import {compareHash} from "../utils/hash.js";
 import { createSession, findSession, deleteSession } from "../services/session.js";
 
@@ -14,6 +14,15 @@ res.cookie("sessionId", _id, {
     httpOnly: true,
     expires: refreshTokenValidUntil,
 });
+};
+
+export const requestResetEmailController = async (req, res) => {
+  await requestResetToken(req.body.email);
+  res.json({
+    message: 'Reset password email was successfully sent!',
+    status: 200,
+    data: {},
+  });
 };
 
 export const registerController = async (req, res) => {
@@ -33,9 +42,8 @@ export const registerController = async (req, res) => {
         message: 'User signed up successfully',
       });
     };
- 
 
-  export const loginController = async (req, res) => {
+export const loginController = async (req, res) => {
     const { email, password } = req.body;
     const user = await findUser({ email });
       if (!user) {
@@ -50,7 +58,6 @@ export const registerController = async (req, res) => {
     const session = await createSession(user._id);
     
     setupResponseSession(res, session);
-
 
     res.json({
         status: 200,
