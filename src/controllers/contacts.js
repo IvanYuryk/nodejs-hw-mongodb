@@ -7,6 +7,7 @@ import parsePaginationParams from '../utils/parsePaginationParams.js';
 import parseFilterParams from '../utils/parseFilterParams.js';
 import parseSortParams from '../utils/parseSortParams.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
+import { saveFileToPublicDir } from '../utils/saveFileToPublicDir.js';
 import { fieldList } from '../constants/index.js';
 
 export const getAllContacts = async (req, res) => {
@@ -51,7 +52,12 @@ export const getContactById = async (req, res) => {
 
 export const createContact = async (req, res) => {
   const { _id: userId } = req.user;
-  const newContact = await contactService.createContact({ ...req.body, userId });
+  let photo = "";
+  if (req.file) {
+    photo = await saveFileToPublicDir(req.file, "photos");
+  };
+
+  const newContact = await contactService.createContact({ ...req.body, userId, photo });
   res.status(201).json({
     status: 201,
     message: 'Successfully created a contact!',
