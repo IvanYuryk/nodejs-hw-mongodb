@@ -6,9 +6,13 @@ import { Contact } from '../db/models/contact.js';
 import parsePaginationParams from '../utils/parsePaginationParams.js';
 import parseFilterParams from '../utils/parseFilterParams.js';
 import parseSortParams from '../utils/parseSortParams.js';
-import { calculatePaginationData } from '../utils/calculatePaginationData.js';
-import { saveFileToPublicDir } from '../utils/saveFileToPublicDir.js';
 import { fieldList } from '../constants/index.js';
+import { calculatePaginationData } from '../utils/calculatePaginationData.js';
+import { env } from "../utils/env.js";
+import { saveFileToPublicDir } from '../utils/saveFileToPublicDir.js';
+import {saveFileToCloudinary} from '../utils/saveFileToCloudinary.js';
+
+
 
 export const getAllContacts = async (req, res) => {
   const paginationParams = parsePaginationParams(req.query);
@@ -50,11 +54,18 @@ export const getContactById = async (req, res) => {
     data: contact });
 };
 
+const enable_cloudinary = env("ENABLE_CLOUDINARY");
+
 export const createContact = async (req, res) => {
   const { _id: userId } = req.user;
   let photo = "";
+
   if (req.file) {
-    photo = await saveFileToPublicDir(req.file, "photos");
+    if (enable_cloudinary === "true") {
+      photo = await saveFileToCloudinary(req.file, "photos");
+    } else {
+      photo = await saveFileToPublicDir(req.file, "photos");
+    }
   };
 
   const newContact = await contactService.createContact({ ...req.body, userId, photo });
@@ -69,8 +80,17 @@ export const createContact = async (req, res) => {
 export const updateContact = async (req, res) => {
   const { contactId } = req.params;
   const userId = req.user._id;
+  let photo = "";
 
-  const updatedContact = await contactService.updateContact({ _id: contactId, userId }, req.body);
+  if (req.file) {
+    if (enable_cloudinary === "true") {
+      photo = await saveFileToCloudinary(req.file, "photos");
+    } else {
+      photo = await saveFileToPublicDir(req.file, "photos");
+    }
+  };
+
+  const updatedContact = await contactService.updateContact({ _id: contactId, userId }, req.body, photo);
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
   }

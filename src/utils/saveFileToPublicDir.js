@@ -10,5 +10,4 @@ export const saveFileToPublicDir = async (file, filePath) => {
     await fs.rename(file.path, newPath);
 
     return `/${filePath}/${file.filename}`;
-
 };
