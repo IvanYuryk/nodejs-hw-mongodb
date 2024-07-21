@@ -19,7 +19,7 @@ import {
 
 const router = express.Router();
 
-router.post( '/request-reset-email', validateBody(requestResetEmailSchema), ctrlWrapper(requestResetEmailController));
+router.post("/request-reset-email", validateBody(requestResetEmailSchema), ctrlWrapper(requestResetEmailController));
 
 router.post("/reset-password", validateBody(resetPasswordSchema), ctrlWrapper(resetPasswordController));
 
