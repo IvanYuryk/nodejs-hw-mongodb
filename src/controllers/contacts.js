@@ -90,7 +90,7 @@ export const updateContact = async (req, res) => {
     }
   };
 
-  const updatedContact = await contactService.updateContact({ _id: contactId, userId }, req.body, photo);
+  const updatedContact = await contactService.updateContact({ _id: contactId, userId }, { ...req.body, photo });
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
   }
