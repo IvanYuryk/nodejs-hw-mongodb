@@ -1,7 +1,8 @@
 import createError from "http-errors";
-import { signup, findUser, requestResetToken, resetPassword } from "../services/auth.js";
+import { signup, findUser, requestResetToken, resetPassword, loginOrSignupWithGoogle } from "../services/auth.js";
 import {compareHash} from "../utils/hash.js";
 import { createSession, findSession, deleteSession } from "../services/session.js";
+import { generateAuthUrl } from '../utils/googleOAuth2.js';
 
 const setupResponseSession = (res, { refreshToken, refreshTokenValidUntil, _id}) => {
 
@@ -113,4 +114,28 @@ export const logoutController = async (req, res) => {
   res.clearCookie("refreshToken");
 
   res.status(204).send();
+};
+
+export const getGoogleOAuthUrlController = async (req, res) => {
+  const url = generateAuthUrl();
+  res.json({
+    status: 200,
+    message: 'Successfully get Google OAuth url!',
+    data: {
+      url,
+    },
+  });
+};
+
+export const loginWithGoogleController = async (req, res) => {
+  const session = await loginOrSignupWithGoogle(req.body.code);
+  setupResponseSession(res, session);
+
+  res.json({
+      status: 200,
+      message: 'Successfully logged in via Google OAuth!',
+      data: {
+          accessToken: session.accessToken,
+      },
+  });
 };

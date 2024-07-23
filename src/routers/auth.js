@@ -1,21 +1,24 @@
 import express from 'express';
+import { validateBody } from '../validation/validateBody.js';
+import {
+    userRegisterSchema,
+    userLoginSchema,
+    requestResetEmailSchema,
+    resetPasswordSchema,
+    loginWithGoogleOAuthSchema
+} from '../validation/userValidation.js';
+
+import { ctrlWrapper } from '../middlewares/ctrlWrapper.js';
 import {
     registerController,
     loginController,
     refreshController,
     logoutController,
     requestResetEmailController,
-    resetPasswordController
+    resetPasswordController,
+    getGoogleOAuthUrlController,
+    loginWithGoogleController
 } from '../controllers/auth.js';
-import { ctrlWrapper } from '../middlewares/ctrlWrapper.js';
-import { validateBody } from '../validation/validateBody.js';
-
-import {
-    userRegisterSchema,
-    userLoginSchema,
-    requestResetEmailSchema,
-    resetPasswordSchema
-} from '../validation/userValidation.js';
 
 const router = express.Router();
 
@@ -26,6 +29,10 @@ router.post("/reset-pwd", validateBody(resetPasswordSchema), ctrlWrapper(resetPa
 router.post("/register", validateBody(userRegisterSchema), ctrlWrapper(registerController));
 
 router.post("/login", validateBody(userLoginSchema), ctrlWrapper(loginController));
+
+router.get("/get-oauth-url", ctrlWrapper(getGoogleOAuthUrlController));
+
+router.post("/confirm-oauth", validateBody(loginWithGoogleOAuthSchema), ctrlWrapper(loginWithGoogleController));
 
 router.post ("/refresh", ctrlWrapper(refreshController));
 
