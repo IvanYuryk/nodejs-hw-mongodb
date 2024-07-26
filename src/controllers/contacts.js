@@ -10,7 +10,7 @@ import { fieldList } from '../constants/index.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 import { env } from "../utils/env.js";
 import { saveFileToPublicDir } from '../utils/saveFileToPublicDir.js';
-import {saveFileToCloudinary} from '../utils/saveFileToCloudinary.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 
 
 
@@ -51,7 +51,8 @@ export const getContactById = async (req, res) => {
   res.status(200).json({
     status: 200,
     message: `Contact with id=${contactId} found success`,
-    data: contact });
+    data: contact
+  });
 };
 
 const enable_cloudinary = env("ENABLE_CLOUDINARY");
